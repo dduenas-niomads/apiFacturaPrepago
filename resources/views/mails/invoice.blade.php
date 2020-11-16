@@ -130,8 +130,10 @@
                             </td>
                             
                             <td>
-                                {{ !is_null($order->billing_address) ? $order->billing_address['name'] : "" }}<br>
-                                {{ !is_null($order->billing_address) ? $order->billing_address['phone'] : "" }}<br>
+                                @if (!is_null($order->billing_address))
+                                    {{ isset($order->billing_address['name']) ? $order->billing_address['name'] : "" }}<br>
+                                    {{ isset($order->billing_address['phone']) ? $order->billing_address['phone'] : "" }}<br>
+                                @endif 
                                 {{ $order->email }}
                             </td>
                         </tr>
