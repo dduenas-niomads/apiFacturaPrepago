@@ -107,6 +107,7 @@ class OrderEcommerceController extends Controller
         try {
             $orderEcommerce->notify(new SendEINotification($orderEcommerce));
             $orderEcommerce->email_sended_at = date("Y-m-d H:i:s");
+            $orderEcommerce->flag_ei_send = 1;
             $orderEcommerce->save();
         } catch (\Throwable $th) {
             throw $th;
@@ -132,6 +133,7 @@ class OrderEcommerceController extends Controller
                         $ecommerceCredentials->ecommerce_store . '.myshopify.com', 
                         [ 
                             'metaCacheDir' => '/app/storage/app/public/cache/tmp' // Metadata cache dir, required 
+                            // 'metaCacheDir' => './tmp' // Metadata cache dir, required 
                         ]
                     );
                     $orders = $client->getOrderManager()->findAll([

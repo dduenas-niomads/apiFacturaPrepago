@@ -43,7 +43,7 @@ class SendEINotification extends Notification
     public function toMail($notifiable)
     {
         try {
-            $emailResult =  (new MailMessage)
+            return (new MailMessage)
                 ->subject('Comprobante de pago electrónico')
                 ->line('¡Gracias por tu compra! Te enviamos tu comprobante de pago electrónico')
                 ->action('Gracias', url("https://mehperu.com"))
