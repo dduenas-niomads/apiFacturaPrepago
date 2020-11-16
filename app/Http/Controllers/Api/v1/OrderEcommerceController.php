@@ -131,7 +131,7 @@ class OrderEcommerceController extends Controller
                     $client = new \Slince\Shopify\Client($credential, 
                         $ecommerceCredentials->ecommerce_store . '.myshopify.com', 
                         [ 
-                            'metaCacheDir' => './tmp' // Metadata cache dir, required 
+                            'metaCacheDir' => '/app/cache/tmp' // Metadata cache dir, required 
                         ]
                     );
                     $orders = $client->getOrderManager()->findAll([
