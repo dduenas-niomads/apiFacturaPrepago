@@ -83,18 +83,18 @@ class OrderEcommerceController extends Controller
             ->where("order_number", $params['orderNumber'])
             ->first();
     
-        // if (is_null($orderEcommerce)) {
-        //     self::createOrderEcommerce($params);
-        //     $response = true;
-        // } else {
-        //     if (!$orderEcommerce->flag_ei_send 
-        //         && isset($params['financialStatus'])
-        //         && $params['financialStatus'] == "paid") {
-        //         self::sendEmail($orderEcommerce, $params['financialStatus']);
-        //     }
-        // }
+        if (is_null($orderEcommerce)) {
+            self::createOrderEcommerce($params);
+            $response = true;
+        } else {
+            if (!$orderEcommerce->flag_ei_send 
+                && isset($params['financialStatus'])
+                && $params['financialStatus'] == "paid") {
+                self::sendEmail($orderEcommerce, $params['financialStatus']);
+            }
+        }
         
-        return $orderEcommerce;
+        return $response;
     }
 
     public static function sendEmail($orderEcommerce, $financialStatus = null)
@@ -192,12 +192,9 @@ class OrderEcommerceController extends Controller
             foreach ($response['data'] as $key => $value) {
                 $value['bs_companies_id'] = $companyId;
                 $value['created_at'] = $value['createdAt'];
-                $order = self::searchOrderEcommerce($value);
-
-                return view('mails.invoice', ["order" => $order]);
-                // if (self::searchOrderEcommerce($value)) {
-                //     $apiResponse['sync']++;
-                // }
+                if (self::searchOrderEcommerce($value)) {
+                    $apiResponse['sync']++;
+                }
             }
         }
         return $apiResponse;

@@ -42,11 +42,8 @@ class SendEINotification extends Notification
      */
     public function toMail($notifiable)
     {
-        // dd($this->orderEcommerce);
-        // return view('mails.invoice', ["order" => $this->orderEcommerce]);
         try {
             $emailResult =  (new MailMessage)
-                // ->cc("danielgrillz@gmail.com")
                 ->subject('Comprobante de pago electrónico')
                 ->line('¡Gracias por tu compra! Te enviamos tu comprobante de pago electrónico')
                 ->action('Gracias', url("https://mehperu.com"))
@@ -55,7 +52,6 @@ class SendEINotification extends Notification
         } catch (\Throwable $th) {
             throw $th;
         }
-        dd($emailResult);
     }
 
     /**
