@@ -110,9 +110,10 @@ class OrderEcommerceController extends Controller
                     $query->orWhere(OrderEcommerce::TABLE_NAME . '.gateway', 'LIKE', '%' . $key . '%');
                 });
             }
-            if (isset($params['orderBy']) && !is_null($params['orderBy'])) {
-                $orders = $orders->orderBy($params['orderBy'], $params['orderDir']);
-            }
+            // if (isset($params['orderBy']) && !is_null($params['orderBy'])) {
+            //     $orders = $orders->orderBy($params['orderBy'], $params['orderDir']);
+            // }
+            $orders = $orders->orderBy('order_number', 'DESC');
             $orders = $orders->paginate(env('ITEMS_PAGINATOR'));
             return response([
                 "message" => "list of orders",
