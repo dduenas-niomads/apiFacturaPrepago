@@ -15,6 +15,86 @@ use App\Notifications\SendEINotification;
 
 class OrderEcommerceController extends Controller
 {
+    public function getListSuperAdminLocal(Request $request)
+    {
+        $companyId = 7;
+        $apiResponse = [ "sync" => 0 ];
+        $response = ["data" => []];
+        if (!is_null($companyId)) {
+            // shopify access
+            $ecommerceCredentials = self::getEcommerceCredentials($companyId);
+            if (!is_null($ecommerceCredentials->ecommerce_api_key) &&
+                !is_null($ecommerceCredentials->ecommerce_password) &&
+                !is_null($ecommerceCredentials->ecommerce_shared_secret) &&
+                !is_null($ecommerceCredentials->ecommerce_store)) {
+                    $credential = new \Slince\Shopify\PrivateAppCredential(
+                        $ecommerceCredentials->ecommerce_api_key,
+                        $ecommerceCredentials->ecommerce_password,
+                        $ecommerceCredentials->ecommerce_shared_secret);
+                    $client = new \Slince\Shopify\Client($credential, 
+                        $ecommerceCredentials->ecommerce_store . '.myshopify.com', 
+                        [ 
+                            // 'metaCacheDir' => '/app/storage/app/public/cache/tmp' // Metadata cache dir, required 
+                            'metaCacheDir' => './tmp' // Metadata cache dir, required 
+                        ]
+                    );
+                    $orders = $client->getOrderManager()->findAll([
+                        "status" => "any"
+                    ]);
+                    foreach ($orders as $key => $value) {
+                        $order = [
+                            "email" => $value->getEmail(),
+                            "createdAt" => $value->getCreatedAt(),
+                            "totalPrice" => $value->getTotalPrice(),
+                            "subtotalPrice" => $value->getSubtotalPrice(),
+                            "totalDiscounts" => $value->getTotalDiscounts(),
+                            "totalLineItemsPrice" => $value->getTotalLineItemsPrice(),
+                            "currency" => $value->getCurrency(),
+                            "gateway" => $value->getGateway(),
+                            "orderNumber" => $value->getOrderNumber(),
+                            "confirmed" => $value->isConfirmed(),
+                            "financialStatus" => $value->getFinancialStatus(),
+                            "lineItems" => [],
+                            "shippingLines" => [],
+                            "billingAddress" => [],
+                        ];
+                        if (!is_null($value->getBillingAddress())) {
+                            $order['billingAddress'] = [
+                                "name" => $value->getBillingAddress()->getName(),
+                                "address1" => $value->getBillingAddress()->getAddress1(),
+                                "address2" => $value->getBillingAddress()->getAddress2(),
+                                "city" => $value->getBillingAddress()->getCity(),
+                                "country" => $value->getBillingAddress()->getCountry(),
+                                "province" => $value->getBillingAddress()->getProvince(),
+                                "zip" => $value->getBillingAddress()->getZip(),
+                                "phone" => $value->getBillingAddress()->getPhone(),
+                                "provinceCode" => $value->getBillingAddress()->getProvinceCode(),
+                                "countryCode" => $value->getBillingAddress()->getCountryCode()
+                            ];
+                        
+                        }
+                        foreach ($value->getLineItems() as $keyLineItem => $lineItem) {
+                            array_push($order['lineItems'], [
+                                "name" => $lineItem->getName(),
+                                "vendor" => $lineItem->getVendor(),
+                                "quantity" => $lineItem->getQuantity(),
+                                "price" => $lineItem->getPrice(),
+                            ]);
+                        }
+                        foreach ($value->getShippingLines() as $keyShippingLine => $shippingLine) {
+                            array_push($order['shippingLines'], [
+                                "code" => $shippingLine->getCode(),
+                                "price" => $shippingLine->getPrice(),
+                                "source" => $shippingLine->getSource(),
+                            ]);
+                        }
+                        array_push($response['data'], $order);
+                    }
+            }
+        }
+        return $response;
+    }
+
     public function getListSuperAdmin(Request $request)
     {
         $user = Auth::user();
@@ -80,7 +160,7 @@ class OrderEcommerceController extends Controller
 
         $orderEcommerce = OrderEcommerce::whereNull("deleted_at")
             ->where("bs_companies_id", $params['bs_companies_id'])
-            ->where("order_number", $params['orderNumber'])
+            ->where("order_number", (int)$params['orderNumber'])
             ->first();
     
         if (is_null($orderEcommerce)) {
@@ -89,7 +169,7 @@ class OrderEcommerceController extends Controller
         } else {
             if (!$orderEcommerce->flag_ei_send 
                 && isset($params['financialStatus'])
-                && $params['financialStatus'] == "paid") {
+                && $params['financialStatus'] === "paid") {
                 self::sendEmail($orderEcommerce, $params['financialStatus']);
             }
         }
