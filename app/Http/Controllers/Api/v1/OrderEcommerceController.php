@@ -110,14 +110,35 @@ class OrderEcommerceController extends Controller
                     $query->orWhere(OrderEcommerce::TABLE_NAME . '.gateway', 'LIKE', '%' . $key . '%');
                 });
             }
+            if (isset($params['document']) && strlen($params['document']) > 1) {
+                $orders = $orders->where(OrderEcommerce::TABLE_NAME . '.ruc', $params['document']);
+            }
+            if (isset($params['period']) && strlen($params['period']) > 1) {
+                $orders = $orders->where(OrderEcommerce::TABLE_NAME . '.created_at', 'LIKE' , '%' . $params['period'] . '%');
+            }
+            if (isset($params['orderNumber']) && strlen($params['orderNumber']) > 1) {
+                $orders = $orders->where(OrderEcommerce::TABLE_NAME . '.order_number', 'LIKE' , '%' . (int)$params['orderNumber'] . '%');
+            }
             // if (isset($params['orderBy']) && !is_null($params['orderBy'])) {
             //     $orders = $orders->orderBy($params['orderBy'], $params['orderDir']);
             // }
             $orders = $orders->orderBy('order_number', 'DESC');
-            $orders = $orders->paginate(env('ITEMS_PAGINATOR'));
+            $ordersTotal = 0;
+            if (isset($params['limit']) && (int)$params['limit'] === 0) {
+                $orders = $orders->get();
+                foreach ($orders as $key => $value) {
+                    if ((int)$value->confirmed === 1 
+                        && $value->financial_status === "paid") {
+                        $ordersTotal = $ordersTotal + $value->total_price;
+                    }
+                }
+            } else {
+                $orders = $orders->paginate(env('ITEMS_PAGINATOR'));
+            }
             return response([
                 "message" => "list of orders",
-                "body" => $orders
+                "body" => $orders,
+                "ordersTotal" => $ordersTotal
             ], 200);
         } else {
             return response([
@@ -195,10 +216,11 @@ class OrderEcommerceController extends Controller
         }
     }
 
-    public static function syncOrderEcommerce($companyId = null)
+    public static function syncOrderEcommerce(Request $request, $companyId = null)
     {
         $apiResponse = [ "sync" => 0 ];
         $response = ["data" => []];
+        $params = $request->all();
         if (!is_null($companyId)) {
             // shopify access
             $ecommerceCredentials = self::getEcommerceCredentials($companyId);
@@ -218,8 +240,12 @@ class OrderEcommerceController extends Controller
                         ]
                     );
                     $orders = $client->getOrderManager()->findAll([
-                        "status" => "any"
+                        "status" => "any",
+                        "created_at_min" => $params["startDate"] . " 00:00:00",
+                        "created_at_max" => $params["endDate"] . " 21:59:59",
+                        "limit" => 250
                     ]);
+                    // dd($orders);
                     foreach ($orders as $key => $value) {
                         $order = [
                             "email" => $value->getEmail(),
@@ -250,7 +276,6 @@ class OrderEcommerceController extends Controller
                                 "provinceCode" => $value->getBillingAddress()->getProvinceCode(),
                                 "countryCode" => $value->getBillingAddress()->getCountryCode()
                             ];
-                        
                         }
                         foreach ($value->getLineItems() as $keyLineItem => $lineItem) {
                             array_push($order['lineItems'], [
@@ -271,6 +296,7 @@ class OrderEcommerceController extends Controller
                     }
             }
         }
+        // return $response;
         if (!empty($response)) {
             foreach ($response['data'] as $key => $value) {
                 $value['bs_companies_id'] = $companyId;
