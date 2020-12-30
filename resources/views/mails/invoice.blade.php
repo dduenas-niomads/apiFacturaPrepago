@@ -240,6 +240,9 @@
                 </td>
             </tr>
         </table>
+
+        <br>
+        <p>Tienes hasta 5 días a partir de la compra para poder realizar cualquier tipo de cambio</p>
     </div>
 </body>
 </html>
