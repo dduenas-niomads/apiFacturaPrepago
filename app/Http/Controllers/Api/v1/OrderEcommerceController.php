@@ -201,19 +201,19 @@ class OrderEcommerceController extends Controller
 
     public static function sendEmail($orderEcommerce, $financialStatus = null)
     {
-        // if (!is_null($financialStatus)) {
-        //     $orderEcommerce->financial_status = $financialStatus;
-        //     $orderEcommerce->save();
-        // }
+        if (!is_null($financialStatus)) {
+            $orderEcommerce->financial_status = $financialStatus;
+            $orderEcommerce->save();
+        }
 
-        // try {
-        //     $orderEcommerce->notify(new SendEINotification($orderEcommerce));
-        //     $orderEcommerce->email_sended_at = date("Y-m-d H:i:s");
-        //     $orderEcommerce->flag_ei_send = 1;
-        //     $orderEcommerce->save();
-        // } catch (\Throwable $th) {
-        //     throw $th;
-        // }
+        try {
+            $orderEcommerce->notify(new SendEINotification($orderEcommerce));
+            $orderEcommerce->email_sended_at = date("Y-m-d H:i:s");
+            $orderEcommerce->flag_ei_send = 1;
+            $orderEcommerce->save();
+        } catch (\Throwable $th) {
+            throw $th;
+        }
     }
 
     public static function syncOrderEcommerce(Request $request, $companyId = null)
