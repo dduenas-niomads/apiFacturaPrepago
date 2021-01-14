@@ -111,10 +111,10 @@ class OrderEcommerceController extends Controller
                     $query->orWhere(OrderEcommerce::TABLE_NAME . '.gateway', 'LIKE', '%' . $key . '%');
                 });
             }
-            if (isset($params['document']) && strlen($params['document']) > 1) {
+            if (isset($params['document'])) {
                 $orders = $orders->where(OrderEcommerce::TABLE_NAME . '.ruc', $params['document']);
             }
-            if (isset($params['period']) && strlen($params['period']) > 1) {
+            if (isset($params['period'])) {
                 $orders = $orders->where(OrderEcommerce::TABLE_NAME . '.created_at', 'LIKE' , '%' . $params['period'] . '%');
             }
             if (isset($params['orderNumber']) && strlen($params['orderNumber']) > 1) {
@@ -125,12 +125,14 @@ class OrderEcommerceController extends Controller
             // }
             $orders = $orders->orderBy('order_number', 'DESC');
             $ordersTotal = 0;
+            $ordersSubtotal = 0;
             if (isset($params['limit']) && (int)$params['limit'] === 0) {
                 $orders = $orders->get();
                 foreach ($orders as $key => $value) {
                     if ((int)$value->confirmed === 1 
                         && $value->financial_status === "paid") {
                         $ordersTotal = $ordersTotal + $value->total_price;
+                        $ordersSubtotal = $ordersSubtotal + $value->subtotal_price;
                     }
                 }
             } else {
@@ -139,7 +141,8 @@ class OrderEcommerceController extends Controller
             return response([
                 "message" => "list of orders",
                 "body" => $orders,
-                "ordersTotal" => $ordersTotal
+                "ordersTotal" => $ordersTotal,
+                "ordersSubtotal" => $ordersSubtotal
             ], 200);
         } else {
             return response([
