@@ -139,6 +139,7 @@ class OrderEcommerceController extends Controller
                     }
                 }
             } else {
+                dd($orders->toSql(), $orders->getBindings());
                 $orders = $orders->paginate(env('ITEMS_PAGINATOR'));
             }
             return response([
