@@ -139,7 +139,12 @@ class OrderEcommerceController extends Controller
                     }
                 }
             } else {
-                dd($orders->toSql(), $orders->getBindings());
+                return response([
+                    "message" => "list of orders",
+                    "body" => [$orders->toSql(), $orders->getBindings()],
+                    "ordersTotal" => $ordersTotal,
+                    "ordersSubtotal" => $ordersSubtotal
+                ], 200);
                 $orders = $orders->paginate(env('ITEMS_PAGINATOR'));
             }
             return response([
