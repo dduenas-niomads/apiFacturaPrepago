@@ -102,7 +102,8 @@ class OrderEcommerceController extends Controller
             $params = $request->all();
             $orders = OrderEcommerce::whereNull(OrderEcommerce::TABLE_NAME . '.deleted_at')
                 ->where(OrderEcommerce::TABLE_NAME . '.bs_companies_id', $user->bs_companies_id)
-                ->where(OrderEcommerce::TABLE_NAME . '.financial_status', "paid");
+                ->where(OrderEcommerce::TABLE_NAME . '.financial_status', "paid")
+                ->whereNotNull(OrderEcommerce::TABLE_NAME . '.ruc');
             if (isset($params['search']) && !is_null($params['search'])) {
                 $key = $params['search'];
                 $orders = $orders->where(function($query) use ($key){
