@@ -111,7 +111,7 @@
                             </td>
                             
                             <td>
-                                Boleta de venta #: B002-{{ str_pad($order->id, 8, "0", STR_PAD_LEFT) }} <br>
+                                Boleta de venta #: {{$order->serie . "-" . str_pad($order->correlative, 8, "0", STR_PAD_LEFT) }} <br>
                                 Fecha: {{ $order->created_at }}<br>
                             </td>
                         </tr>
