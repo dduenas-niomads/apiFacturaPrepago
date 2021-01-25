@@ -176,7 +176,7 @@ class OrderEcommerceController extends Controller
             if (!isset($params['limit'])) {
                 $params['limit'] = 1;
             }
-            $orders = $orders->orderBy('correlative', 'DESC')
+            $orders = $orders->orderBy('correlative', 'ASC')
                 ->offset($params['offset'])->limit($params['limit'])
                 ->get();
             $orders_ = [];
@@ -199,7 +199,7 @@ class OrderEcommerceController extends Controller
                                 "STATUS" => "1",
                                 "COD_MONEDA" => "PEN",
                                 "TOTAL" => $value->subtotal_price,
-                                "GRAVADA" => $value->subtotal_price/1.18,
+                                "GRAVADA" => (string)round($value->subtotal_price/1.18, 4),
                                 "EXONERADO" => "0",
                                 "INAFECTO" => "0",
                                 "EXPORTACION" => "0",
@@ -207,7 +207,7 @@ class OrderEcommerceController extends Controller
                                 "MONTO_CARGO_X_ASIG" => "0",
                                 "CARGO_X_ASIGNACION" => "0",
                                 "ISC" => "0",
-                                "IGV" => $value->subtotal_price - ($value->subtotal_price/1.18),
+                                "IGV" => (string)round($value->subtotal_price - ($value->subtotal_price/1.18), 4),
                                 "OTROS" => "0"
                             ]);
                             $count++;
