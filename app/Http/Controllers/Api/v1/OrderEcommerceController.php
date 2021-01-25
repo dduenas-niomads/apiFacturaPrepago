@@ -186,7 +186,7 @@ class OrderEcommerceController extends Controller
                         && $value->financial_status === "paid") {
                             $documentNumber = "88888888";
                             if ($value->subtotal_price > 700) {
-                                $documentNumber = "47109298";
+                                $documentNumber = "74122648";
                             }
                             array_push($orders_, [
                                 "ITEM" => $count,
