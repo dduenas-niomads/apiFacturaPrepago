@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return response([
-        "message" => "niomads api"
+        "message" => "factura prepago api"
     ]);
 });
 
