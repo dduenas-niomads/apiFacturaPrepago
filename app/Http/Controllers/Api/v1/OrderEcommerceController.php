@@ -139,7 +139,7 @@ class OrderEcommerceController extends Controller
                     }
                 }
             } else {
-                $orders = $orders->paginate(env('ITEMS_PAGINATOR'));
+                $orders = $orders->paginate(10);
             }
             return response([
                 "message" => "list of orders",
