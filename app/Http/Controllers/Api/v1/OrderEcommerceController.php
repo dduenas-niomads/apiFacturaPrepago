@@ -198,8 +198,8 @@ class OrderEcommerceController extends Controller
                                 "TIPO_COMPROBANTE_REF" => "0",
                                 "STATUS" => "1",
                                 "COD_MONEDA" => "PEN",
-                                "TOTAL" => $value->subtotal_price,
-                                "GRAVADA" => (string)round($value->subtotal_price/1.18, 4),
+                                "TOTAL" => (float)round($value->subtotal_price, 2),
+                                "GRAVADA" => (float)round($value->subtotal_price/1.18, 2),
                                 "EXONERADO" => "0",
                                 "INAFECTO" => "0",
                                 "EXPORTACION" => "0",
@@ -207,7 +207,7 @@ class OrderEcommerceController extends Controller
                                 "MONTO_CARGO_X_ASIG" => "0",
                                 "CARGO_X_ASIGNACION" => "0",
                                 "ISC" => "0",
-                                "IGV" => (string)round($value->subtotal_price - ($value->subtotal_price/1.18), 4),
+                                "IGV" => (float)round($value->subtotal_price - ($value->subtotal_price/1.18), 2),
                                 "OTROS" => "0"
                             ]);
                             $count++;
