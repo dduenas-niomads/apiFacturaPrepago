@@ -124,6 +124,7 @@ Route::prefix('/super-admin/orders')->group(function() {
 // Orders - SUPER ADMIN
 Route::prefix('/super-admin/orders-ecommerce')->group(function() {
     Route::middleware('auth:api')->get('/', 'Api\v1\OrderEcommerceController@getListSuperAdmin');
+    Route::middleware('auth:api')->get('/rdc', 'Api\v1\OrderEcommerceController@getListRdc');
 });
 // Orders - STORE ADMIN
 Route::prefix('/store-admin/orders')->group(function() {

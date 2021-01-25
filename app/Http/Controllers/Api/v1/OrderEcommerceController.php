@@ -155,6 +155,66 @@ class OrderEcommerceController extends Controller
         }
     }
 
+    public function getListRdc(Request $request)
+    {
+        $user = Auth::user();
+        if (!is_null($user)) {
+            $params = $request->all();
+            $orders = OrderEcommerce::whereNull(OrderEcommerce::TABLE_NAME . '.deleted_at')
+                ->where(OrderEcommerce::TABLE_NAME . '.bs_companies_id', $user->bs_companies_id);
+            if (isset($params['limit']) && (int)$params['limit'] === 0) {
+                $orders = $orders->where(OrderEcommerce::TABLE_NAME . '.financial_status', "paid")
+                    ->whereNotNull(OrderEcommerce::TABLE_NAME . '.ruc');
+            }
+            if (isset($params['search']) && !is_null($params['search'])) {
+                $key = $params['search'];
+                $orders = $orders->where(function($query) use ($key){
+                    $query->where(OrderEcommerce::TABLE_NAME . '.order_number', 'LIKE', '%' . $key . '%');
+                    $query->orWhere(OrderEcommerce::TABLE_NAME . '.email', 'LIKE', '%' . $key . '%');
+                    $query->orWhere(OrderEcommerce::TABLE_NAME . '.gateway', 'LIKE', '%' . $key . '%');
+                });
+            }
+            if (isset($params['document'])) {
+                $orders = $orders->where(OrderEcommerce::TABLE_NAME . '.ruc', $params['document']);
+            }
+            if (isset($params['period'])) {
+                $orders = $orders->where(OrderEcommerce::TABLE_NAME . '.created_at', 'LIKE' , '%' . $params['period'] . '%');
+            }
+            if (isset($params['orderNumber']) && strlen($params['orderNumber']) > 1) {
+                $orders = $orders->where(OrderEcommerce::TABLE_NAME . '.order_number', 'LIKE' , '%' . (int)$params['orderNumber'] . '%');
+            }
+            // if (isset($params['orderBy']) && !is_null($params['orderBy'])) {
+            //     $orders = $orders->orderBy($params['orderBy'], $params['orderDir']);
+            // }
+            $orders = $orders->orderBy('order_number', 'DESC');
+            $ordersTotal = 0;
+            $ordersSubtotal = 0;
+            if (isset($params['limit']) && (int)$params['limit'] === 0) {
+                $orders = $orders->get();
+                foreach ($orders as $key => $value) {
+                    if ((int)$value->confirmed === 1 
+                        && $value->financial_status === "paid") {
+                        $ordersTotal = $ordersTotal + $value->total_price;
+                        $ordersSubtotal = $ordersSubtotal + $value->subtotal_price;
+                    }
+                }
+            } else {
+                $orders = $orders->paginate(10);
+            }
+            return response([
+                "message" => "list of orders",
+                "body" => $orders,
+                "ordersTotal" => $ordersTotal,
+                "ordersSubtotal" => $ordersSubtotal
+            ], 200);
+        } else {
+            return response([
+                "message" => "forbidden",
+                "body" => null
+            ], 403);
+        }
+    }
+
     public static function createOrderEcommerce($params = [])
     {
         $orderEcommerce = new OrderEcommerce();
