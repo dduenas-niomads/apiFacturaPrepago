@@ -329,9 +329,6 @@ class OrderEcommerceController extends Controller
                         "created_at_max" => $params["endDate"] . " 21:59:59",
                         "limit" => 250
                     ]);
-                    if (isset($params['printOrders'])) {
-                        dd($orders);
-                    }
                     foreach ($orders as $key => $value) {
                         $order = [
                             "email" => $value->getEmail(),
@@ -379,6 +376,9 @@ class OrderEcommerceController extends Controller
                             ]);
                         }
                         array_push($response['data'], $order);
+                    }
+                    if (isset($params['printOrders'])) {
+                        dd(json_encode($response));
                     }
             }
         }
