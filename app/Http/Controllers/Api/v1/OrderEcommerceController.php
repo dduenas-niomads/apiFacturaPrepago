@@ -306,7 +306,6 @@ class OrderEcommerceController extends Controller
         $params = $request->all();
         if (!is_null($companyId)) {
             // shopify access
-            dd(env('META_CACHE_DIR'));
             $ecommerceCredentials = self::getEcommerceCredentials($companyId);
             if (!is_null($ecommerceCredentials->ecommerce_api_key) &&
                 !is_null($ecommerceCredentials->ecommerce_password) &&
