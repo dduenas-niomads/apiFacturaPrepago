@@ -227,7 +227,7 @@ class OrderEcommerceController extends Controller
         }
     }
 
-    public static function createOrderEcommerce($params = [])
+    public static function createOrderEcommerce($params = [], $sendEmail = true)
     {
         $orderEcommerce = new OrderEcommerce();
         $orderEcommerce->bs_companies_id = isset($params['bs_companies_id']) ? $params['bs_companies_id'] : null;
@@ -248,7 +248,9 @@ class OrderEcommerceController extends Controller
         $orderEcommerce->created_at = isset($params['created_at']) ? $params['created_at'] : null;
         $orderEcommerce->save();
 
-        if ($orderEcommerce->confirmed && $orderEcommerce->financial_status == "paid") {
+        if ($orderEcommerce->confirmed 
+            && $orderEcommerce->financial_status === "paid"
+             && $sendEmail) {
             self::sendEmail($orderEcommerce);
         }
 
@@ -260,19 +262,24 @@ class OrderEcommerceController extends Controller
         $response = false;
 
         $orderEcommerce = OrderEcommerce::whereNull("deleted_at")
-            ->where("bs_companies_id", $params['bs_companies_id'])
-            ->where("order_number", (int)$params['orderNumber'])
+            ->where(OrderEcommerce::TABLE_NAME . ".bs_companies_id", $params['bs_companies_id'])
+            ->where(OrderEcommerce::TABLE_NAME . ".order_number", (int)$params['orderNumber'])
             ->first();
     
         if (is_null($orderEcommerce)) {
-            self::createOrderEcommerce($params);
+            self::createOrderEcommerce($params, $sendEmail);
             $response = true;
         } else {
+            if ($orderEcommerce->financial_status !== $params['financialStatus']) {
+                $orderEcommerce->financial_status = $params['financialStatus'];
+                $orderEcommerce->save();
+            }
+
             if (!$orderEcommerce->flag_ei_send 
                 && isset($params['financialStatus'])
                 && $params['financialStatus'] === "paid") {
                     if ($sendEmail) {
-                        self::sendEmail($orderEcommerce, $params['financialStatus']);
+                        self::sendEmail($orderEcommerce);
                     }
             }
         }
@@ -282,11 +289,6 @@ class OrderEcommerceController extends Controller
 
     public static function sendEmail($orderEcommerce, $financialStatus = null)
     {
-        if (!is_null($financialStatus)) {
-            $orderEcommerce->financial_status = $financialStatus;
-            $orderEcommerce->save();
-        }
-
         try {
             $orderEcommerce->notify(new SendEINotification($orderEcommerce));
             $orderEcommerce->email_sended_at = date("Y-m-d H:i:s");
