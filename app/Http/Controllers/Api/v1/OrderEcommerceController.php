@@ -255,7 +255,7 @@ class OrderEcommerceController extends Controller
         return $orderEcommerce;
     }
 
-    public static function searchOrderEcommerce($params = [])
+    public static function searchOrderEcommerce($params = [], $sendEmail = true)
     {
         $response = false;
 
@@ -271,7 +271,9 @@ class OrderEcommerceController extends Controller
             if (!$orderEcommerce->flag_ei_send 
                 && isset($params['financialStatus'])
                 && $params['financialStatus'] === "paid") {
-                self::sendEmail($orderEcommerce, $params['financialStatus']);
+                    if ($sendEmail) {
+                        self::sendEmail($orderEcommerce, $params['financialStatus']);
+                    }
             }
         }
         
@@ -380,7 +382,11 @@ class OrderEcommerceController extends Controller
             foreach ($response['data'] as $key => $value) {
                 $value['bs_companies_id'] = $companyId;
                 $value['created_at'] = $value['createdAt'];
-                if (self::searchOrderEcommerce($value)) {
+                $sendEmail = true;
+                if (isset($params['sendEmail'])) {
+                    $sendEmail = (boolean)$params['sendEmail'];
+                }
+                if (self::searchOrderEcommerce($value, $sendEmail)) {
                     $apiResponse['sync']++;
                 }
             }
