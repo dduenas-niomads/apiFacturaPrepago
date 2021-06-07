@@ -290,7 +290,7 @@ class OrderEcommerceController extends Controller
     public static function sendEmail($orderEcommerce, $financialStatus = null)
     {
         try {
-            $orderEcommerce->notify(new SendEINotification($orderEcommerce));
+            // $orderEcommerce->notify(new SendEINotification($orderEcommerce));
             $orderEcommerce->email_sended_at = date("Y-m-d H:i:s");
             $orderEcommerce->flag_ei_send = 1;
             $orderEcommerce->save();
