@@ -217,6 +217,7 @@ class OrderEcommerceController extends Controller
                 "message" => "RC",
                 "offset" => $params['offset'],
                 "limit" => $params['limit'],
+                "total" => count($orders_),
                 "body" => $orders_,
             ], 200);
         } else {
