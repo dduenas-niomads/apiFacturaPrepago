@@ -185,7 +185,7 @@ class OrderEcommerceController extends Controller
                     if ((int)$value->confirmed === 1 
                         && $value->financial_status === "paid") {
                             $documentNumber = "88888888";
-                            if ($value->subtotal_price > 700) {
+                            if ($value->total_price > 700) {
                                 $documentNumber = "74122648";
                             }
                             array_push($orders_, [
@@ -198,8 +198,8 @@ class OrderEcommerceController extends Controller
                                 "TIPO_COMPROBANTE_REF" => "0",
                                 "STATUS" => "1",
                                 "COD_MONEDA" => "PEN",
-                                "TOTAL" => (float)round($value->subtotal_price, 2),
-                                "GRAVADA" => (float)round($value->subtotal_price/1.18, 2),
+                                "TOTAL" => (float)round($value->total_price, 2),
+                                "GRAVADA" => (float)round($value->total_price/1.18, 2),
                                 "EXONERADO" => "0",
                                 "INAFECTO" => "0",
                                 "EXPORTACION" => "0",
@@ -207,7 +207,7 @@ class OrderEcommerceController extends Controller
                                 "MONTO_CARGO_X_ASIG" => "0",
                                 "CARGO_X_ASIGNACION" => "0",
                                 "ISC" => "0",
-                                "IGV" => (float)round($value->subtotal_price - ($value->subtotal_price/1.18), 2),
+                                "IGV" => (float)round($value->total_price - ($value->total_price/1.18), 2),
                                 "OTROS" => "0"
                             ]);
                             $count++;
@@ -377,7 +377,7 @@ class OrderEcommerceController extends Controller
                         }
                         array_push($response['data'], $order);
                     }
-                    if (isset($params['printOrders'])) {
+                    if (isset($params['printOrders']) && (boolean)$params['printOrders']) {
                         dd(json_encode($response));
                     }
             }
