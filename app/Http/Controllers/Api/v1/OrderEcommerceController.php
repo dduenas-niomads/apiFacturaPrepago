@@ -402,6 +402,12 @@ class OrderEcommerceController extends Controller
 
     public static function getEcommerceCredentials($companyId)
     {
-        return Company::find($companyId);
+        return (object)[  
+            "ecommerce_api_key" => "c529ebe68597513c7108f7caa390d064",
+            "ecommerce_password" => "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",
+            "ecommerce_shared_secret" => "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",
+            "ecommerce_store" => "pruebasrebmeh",
+        ];
+        // return Company::find($companyId);
     }
 }
